@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MindTracker - Mental Wellness App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                "primary": "#19e5e6",
+                "background-light": "#f6f8f8",
+                "background-dark": "#112121",
+            },
+            fontFamily: {
+                "display": ["Inter"]
+            },
+            borderRadius: {
+                "DEFAULT": "0.5rem",
+                "lg": "1rem",
+                "xl": "1.5rem",
+                "full": "9999px"
+            },
+        },
+    },
+}
+</script>
+<style>
+body {
+    font-family: 'Inter', sans-serif;
+}
+.page-section {
+    display: none;
+}
+.page-section.active {
+    display: block;
+}
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+
+<div id="welcome-page" class="page-section active">
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
+<div class="w-full max-w-2xl text-center">
+<h1 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">
+    Welcome To <span class="text-primary">MindTracker</span>
+</h1>
+<p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto">
+    Your journey to a healthier mind starts here. Track your mood, set goals, and discover insights to improve your well-being.
+</p>
+<button onclick="navigateTo('track-mood')" class="bg-primary text-gray-900 font-bold py-3 px-8 rounded-lg text-lg hover:bg-primary/80 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+    Get Started
+</button>
+</div>
+</div>
+</div>
+
+<div id="track-mood-page" class="page-section">
+<div class="min-h-screen flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-gray-200 dark:border-gray-800 px-10 py-3">
+<div class="flex items-center gap-4 text-gray-900 dark:text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h2 class="text-xl font-bold">MindTracker</h2>
+</div>
+<div class="flex flex-1 justify-end items-center gap-6">
+<nav class="flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('dashboard')">Home</a>
+<a class="text-primary font-bold cursor-pointer" onclick="navigateTo('track-mood')">Mood Tracker</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('journal')">Journal</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('missions')">Missions</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('calendar')">Calendar</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('settings')">Settings</a>
+</nav>
+</div>
+</header>
+<main class="flex-1 px-4 py-8 sm:px-6 md:px-10 lg:py-16">
+<div class="mx-auto max-w-4xl">
+<div class="text-center mb-12">
+<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">Track Your Mood Easily</h1>
+<p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Select how you're feeling every day and see your emotional trends</p>
+</div>
+<div class="bg-white dark:bg-background-dark rounded-xl shadow-lg p-8">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">How are you feeling today?</h2>
+<div class="flex flex-wrap justify-center gap-4">
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Happy
+    <input checked="" class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="happy" onchange="saveMood('happy')"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Content
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="content" onchange="saveMood('content')"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Neutral
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="neutral" onchange="saveMood('neutral')"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Sad
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="sad" onchange="saveMood('sad')"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Angry
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="angry" onchange="saveMood('angry')"/>
+</label>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<div id="name-page" class="page-section">
+<div class="flex flex-col min-h-screen">
+<header class="flex items-center justify-between px-6 py-4 border-b border-primary/20 dark:border-primary/30">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 text-black dark:text-white">
+<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold text-black dark:text-white">MindfulMe</h1>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-4">
+<div class="w-full max-w-md text-center">
+<h2 class="text-3xl font-bold text-black dark:text-white mb-2">What is your name?</h2>
+<p class="text-base text-black/60 dark:text-white/60 mb-8">e.g. Muhammad Hafidz</p>
+<div class="w-full mb-6">
+<label class="sr-only" for="name">Name</label>
+<input class="w-full px-4 py-3 bg-white/50 dark:bg-black/20 border border-primary/30 dark:border-primary/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 transition-all duration-300" id="name" name="name" placeholder="Sebutkan namamu" type="text" onkeypress="if(event.key==='Enter')saveNameFunc()"/>
+</div>
+<button onclick="saveNameFunc()" class="w-full bg-primary text-black dark:text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 dark:hover:bg-opacity-80 transition-colors duration-300">
+    Continue
+</button>
+</div>
+</main>
+</div>
+</div>
+
+<div id="dashboard-page" class="page-section">
+<!-- Dashboard content akan ditambahkan via JS --></div>
+
+<div id="missions-page" class="page-section">
+<!-- Missions content akan ditambahkan via JS --></div>
+
+<div id="calendar-page" class="page-section">
+<!-- Calendar content akan ditambahkan via JS --></div>
+
+<div id="journal-page" class="page-section">
+<!-- Journal content akan ditambahkan via JS --></div>
+
+<div id="settings-page" class="page-section">
+<!-- Settings content akan ditambahkan via JS --></div>
+
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Day Details</h3>
+        <div class="space-y-3">
+            <p id="detailDate" class="text-lg text-primary font-semibold"></p>
+            <p id="detailMood" class="text-gray-700 dark:text-gray-300"></p>
+            <p id="detailMissions" class="text-gray-700 dark:text-gray-300"></p>
+        </div>
+        <button onclick="closeModal()" class="mt-6 w-full bg-primary text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 transition-colors">
+            Close
+        </button>
+    </div>
+</div>
+
+<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeDeleteModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Hapus Semua Data?</h3>
+            <p class="text-gray-600 dark:text-gray-300">
+                Tindakan ini akan menghapus semua data Anda termasuk nama, riwayat mood, dan progress misi. 
+                <strong class="text-red-600 dark:text-red-400">Tindakan ini tidak dapat dibatalkan.</strong>
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <button 
+                onclick="closeDeleteModal()" 
+                class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+                Batal
+            </button>
+            <button 
+                onclick="confirmDelete()" 
+                class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-[500px] transition-all duration-300">
+    <p id="notificationText" class="font-semibold"></p>
+</div>
+
+<script>
+let currentPage = 'welcome-page';
+let currentChartInstance = null;
+
+function navigateTo(pageName) {
+    document.getElementById(currentPage).classList.remove('active');
+    currentPage = pageName + '-page';
+    document.getElementById(currentPage).classList.add('active');
+    
+    if (pageName === 'dashboard') {
+        loadDashboard();
+    } else if (pageName === 'missions') {
+        loadMissionsPage();
+    } else if (pageName === 'calendar') {
+        renderCalendar();
+    } else if (pageName === 'journal') {
+        loadJournalPage();
+    } else if (pageName === 'settings') {
+        loadSettingsPage();
+    }
+    
+    window.scrollTo(0, 0);
+}
+
+function saveMood(mood) {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    moodHistory[dateStr] = mood;
+    localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
+    
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+        navigateTo('dashboard');
+    } else {
+        navigateTo('name');
+    }
+}
+
+function saveNameFunc() {
+    const nameInput = document.getElementById('name');
+    const name = nameInput.value.trim();
+    
+    if (name === '') {
+        alert('Silakan masukkan nama Anda terlebih dahulu');
+        return;
+    }
+    
+    localStorage.setItem('userName', name);
+    navigateTo('dashboard');
+}
+
+function loadDashboard() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    document.getElementById('userName').textContent = userName;
+    loadStatistics();
+    loadQuote();
+    loadDailyNote();
+    loadPreviousNotes();
+    loadMoodChart();
+}
+
+function loadStatistics() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const missionHistory = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    
+    const streak = calculateStreak(moodHistory);
+    const totalMoods = Object.keys(moodHistory).length;
+    const totalMissions = Object.values(missionHistory).reduce((a, b) => a + b, 0);
+    const mostCommonMood = getMostCommonMood(moodHistory);
+    const thisWeekMoods = getThisWeekMoods(moodHistory);
+    
+    document.getElementById('streakCount').textContent = streak;
+    document.getElementById('totalMoods').textContent = totalMoods;
+    document.getElementById('totalMissions').textContent = totalMissions;
+    document.getElementById('commonMood').textContent = mostCommonMood;
+    document.getElementById('weekMood').textContent = thisWeekMoods;
+    
+    const achievements = calculateAchievements(totalMoods, totalMissions, streak);
+    displayAchievements(achievements);
+}
+
+function calculateStreak(moodHistory) {
+    const dates = Object.keys(moodHistory).sort().reverse();
+    if (dates.length === 0) return 0;
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    for (let i = 0; i < dates.length; i++) {
+        const checkDate = new Date(dates[i]);
+        const expectedDate = new Date(today);
+        expectedDate.setDate(today.getDate() - i);
+        expectedDate.setHours(0,0,0,0);
+        
+        if (checkDate.getTime() === expectedDate.getTime()) {
+            streak++;
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
+
+function getMostCommonMood(moodHistory) {
+    const moods = Object.values(moodHistory);
+    if (moods.length === 0) return 'No data yet';
+    
+    const count = {};
+    moods.forEach(mood => count[mood] = (count[mood] || 0) + 1);
+    
+    const moodLabels = {
+        happy: 'Happy', 
+        content: 'Content', 
+        neutral: 'Neutral', 
+        sad: 'Sad', 
+        angry: 'Angry'
+    };
+    const most = Object.keys(count).reduce((a, b) => count[a] > count[b] ? a : b);
+    return moodLabels[most] || 'No data yet';
+}
+
+function getThisWeekMoods(moodHistory) {
+    const today = new Date();
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    const weekMoods = Object.entries(moodHistory).filter(([date]) => {
+        const d = new Date(date);
+        return d >= weekAgo && d <= today;
+    });
+    
+    return weekMoods.length;
+}
+
+function calculateAchievements(totalMoods, totalMissions, streak) {
+    const achievements = [];
+    
+    if (streak >= 3) achievements.push({
+        badge: 'STREAK', 
+        title: '3 Day Streak', 
+        desc: 'Consistent tracking',
+        color: 'from-orange-500 to-red-500'
+    });
+    if (streak >= 7) achievements.push({
+        badge: 'WEEK', 
+        title: 'Weekly Streak', 
+        desc: 'Outstanding!',
+        color: 'from-yellow-500 to-orange-500'
+    });
+    if (totalMoods >= 10) achievements.push({
+        badge: 'PRO', 
+        title: 'Mood Tracker Pro', 
+        desc: '10+ moods tracked',
+        color: 'from-blue-500 to-cyan-500'
+    });
+    if (totalMissions >= 20) achievements.push({
+        badge: 'MASTER', 
+        title: 'Mission Master', 
+        desc: '20+ missions completed',
+        color: 'from-green-500 to-emerald-500'
+    });
+    if (totalMoods >= 30) achievements.push({
+        badge: 'ELITE', 
+        title: 'Dedication Award', 
+        desc: '30+ days tracking',
+        color: 'from-purple-500 to-pink-500'
+    });
+    
+    return achievements;
+}
+
+function displayAchievements(achievements) {
+    const container = document.getElementById('achievementsContainer');
+    if (achievements.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Start tracking to unlock achievements</p>';
+        return;
+    }
+    
+    container.innerHTML = achievements.map(ach => `
+        <div class="bg-white dark:bg-gray-800 border-2 border-transparent hover:border-primary/50 rounded-xl p-4 transition-all">
+            <div class="inline-block bg-gradient-to-r ${ach.color} text-white text-xs font-bold px-3 py-1 rounded-full mb-2">
+                ${ach.badge}
+            </div>
+            <h4 class="font-bold text-sm text-gray-900 dark:text-white mb-1">${ach.title}</h4>
+            <p class="text-xs text-gray-600 dark:text-gray-400">${ach.desc}</p>
+        </div>
+    `).join('');
+}
+
+function loadQuote() {
+    const quotes = [
+        {text: "Mental health is the key to unlocking your full potential.", author: "MindTracker"},
+        {text: "A journey of a thousand miles begins with a single step.", author: "Lao Tzu"},
+        {text: "A healthy mind is the foundation of a happy life.", author: "MindTracker"},
+        {text: "Every day is a new opportunity to become better.", author: "Unknown"},
+        {text: "Taking care of mental health is as important as caring for your body.", author: "MindTracker"}
+    ];
+    
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('quoteText').textContent = `"${randomQuote.text}"`;
+    document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
+}
+
+function getTodayDate() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function saveDailyNote() {
+    const note = document.getElementById('dailyNote').value.trim();
+    if (!note) {
+        document.getElementById('noteStatus').textContent = 'Note is empty!';
+        document.getElementById('noteStatus').className = 'text-sm text-red-500 mt-2';
+        return;
+    }
+    
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    notes[getTodayDate()] = note;
+    localStorage.setItem('dailyNotes', JSON.stringify(notes));
+    
+    document.getElementById('noteStatus').textContent = 'Note saved successfully!';
+    document.getElementById('noteStatus').className = 'text-sm text-green-500 mt-2';
+    setTimeout(() => {
+        document.getElementById('noteStatus').textContent = '';
+    }, 3000);
+    
+    loadPreviousNotes();
+}
+
+function loadDailyNote() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    const todayNote = notes[getTodayDate()];
+    if (todayNote) {
+        document.getElementById('dailyNote').value = todayNote;
+    }
+}
+
+function loadPreviousNotes() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    const sortedDates = Object.keys(notes).sort().reverse().slice(1, 4);
+    
+    const container = document.getElementById('previousNotes');
+    if (sortedDates.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No previous notes</p>';
+        return;
+    }
+    
+    container.innerHTML = sortedDates.map(date => `
+        <div class="text-sm">
+            <p class="font-semibold text-gray-700 dark:text-gray-300">${date}</p>
+            <p class="text-gray-600 dark:text-gray-400 line-clamp-2">${notes[date]}</p>
+        </div>
+    `).join('<hr class="my-2 border-gray-200 dark:border-gray-700">');
+}
+
+function loadMoodChart() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const sortedDates = Object.keys(moodHistory).sort().slice(-14);
+    
+    if (sortedDates.length === 0) {
+        document.getElementById('moodChartContainer').innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">No mood data yet. Start tracking to see your trends!</p>';
+        return;
+    }
+    
+    const moodValues = {
+        'angry': 1,
+        'sad': 2,
+        'neutral': 3,
+        'content': 4,
+        'happy': 5
+    };
+    
+    const data = sortedDates.map(date => ({
+        x: date,
+        y: moodValues[moodHistory[date]] || 3
+    }));
+    
+    if (currentChartInstance) {
+        currentChartInstance.destroy();
+    }
+    
+    const ctx = document.getElementById('moodChart').getContext('2d');
+    currentChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Mood Trend',
+                data: data,
+                borderColor: '#19e5e6',
+                backgroundColor: 'rgba(25, 229, 230, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#19e5e6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const moodLabels = ['', 'Angry', 'Sad', 'Neutral', 'Content', 'Happy'];
+                            return moodLabels[context.parsed.y];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            const moodLabels = ['', 'Angry', 'Sad', 'Neutral', 'Content', 'Happy'];
+                            return moodLabels[value];
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function loadMissionsPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    loadMissions();
+}
+
+function loadMissions() {
+    const missions = JSON.parse(localStorage.getItem('missions') || '{}');
+    const checkboxes = document.querySelectorAll('#missions-page input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (missions[checkbox.id]) {
+            checkbox.checked = true;
+        }
+        checkbox.addEventListener('change', saveMission);
+    });
+    updateProgress();
+}
+
+function saveMission(e) {
+    const missions = JSON.parse(localStorage.getItem('missions') || '{}');
+    missions[e.target.id] = e.target.checked;
+    localStorage.setItem('missions', JSON.stringify(missions));
+    updateProgress();
+    saveDailyHistory();
+}
+
+function updateProgress() {
+    const total = document.querySelectorAll('#missions-page input[type="checkbox"]').length;
+    const completed = document.querySelectorAll('#missions-page input[type="checkbox"]:checked').length;
+    const percentage = Math.round((completed / total) * 100);
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = `${completed} of ${total} missions completed`;
+    document.getElementById('progressPercent').textContent = `${percentage}%`;
+}
+
+function saveDailyHistory() {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const completed = document.querySelectorAll('#missions-page input[type="checkbox"]:checked').length;
+    
+    const missionHistory = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    missionHistory[dateStr] = completed;
+    localStorage.setItem('missionHistory', JSON.stringify(missionHistory));
+}
+
+let currentDate = new Date();
+
+function renderCalendar() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    
+    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const calendarGrid = document.getElementById('calendarGrid');
+    calendarGrid.innerHTML = '';
+    
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        calendarGrid.appendChild(emptyCell);
+    }
+    
+    const moodData = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const missionData = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const mood = moodData[dateStr];
+        const missions = missionData[dateStr];
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'min-h-[80px] p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors';
+        
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+            dayCell.className += ' ring-2 ring-primary bg-primary/5';
+        }
+        
+        let moodBadge = '';
+        let moodColor = '';
+        if (mood === 'happy') {
+            moodBadge = 'Happy';
+            moodColor = 'bg-green-500';
+        } else if (mood === 'content') {
+            moodBadge = 'Content';
+            moodColor = 'bg-blue-500';
+        } else if (mood === 'neutral') {
+            moodBadge = 'Neutral';
+            moodColor = 'bg-gray-500';
+        } else if (mood === 'sad') {
+            moodBadge = 'Sad';
+            moodColor = 'bg-orange-500';
+        } else if (mood === 'angry') {
+            moodBadge = 'Angry';
+            moodColor = 'bg-red-500';
+        }
+        
+        dayCell.innerHTML = `
+            <div class="text-sm font-semibold text-gray-900 dark:text-white mb-2">${day}</div>
+            ${moodBadge ? `<div class="inline-block ${moodColor} text-white text-xs font-medium px-2 py-0.5 rounded-full mb-1">${moodBadge}</div>` : ''}
+            ${missions ? `<div class="text-xs text-primary font-medium">${missions} missions</div>` : ''}
+        `;
+        
+        dayCell.onclick = () => showDayDetails(dateStr, mood, missions);
+        calendarGrid.appendChild(dayCell);
+    }
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function showDayDetails(date, mood, missions) {
+    const modal = document.getElementById('detailModal');
+    const moodText = mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : 'No data yet';
+    const missionText = missions ? `${missions} missions completed` : 'No data yet';
+    
+    let moodColor = 'text-gray-600 dark:text-gray-400';
+    if (mood === 'happy') moodColor = 'text-green-600 dark:text-green-400';
+    else if (mood === 'content') moodColor = 'text-blue-600 dark:text-blue-400';
+    else if (mood === 'neutral') moodColor = 'text-gray-600 dark:text-gray-400';
+    else if (mood === 'sad') moodColor = 'text-orange-600 dark:text-orange-400';
+    else if (mood === 'angry') moodColor = 'text-red-600 dark:text-red-400';
+    
+    document.getElementById('detailDate').textContent = date;
+    document.getElementById('detailMood').textContent = `Mood: ${moodText}`;
+    document.getElementById('detailMood').className = `text-lg font-semibold ${moodColor}`;
+    document.getElementById('detailMissions').textContent = `Missions: ${missionText}`;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('detailModal').classList.add('hidden');
+}
+
+const guidedPrompts = [
+    "What are three things I'm grateful for today?",
+    "What emotions did I experience today, and what triggered them?",
+    "What challenge did I face today, and how did I handle it?",
+    "What did I learn about myself today?",
+    "What positive actions did I take for my mental health today?",
+    "How can I be kinder to myself tomorrow?",
+    "What patterns am I noticing in my thoughts or behaviors?",
+    "What boundaries do I need to set for my well-being?",
+    "What brings me joy, and how can I incorporate more of it?",
+    "What negative thought can I reframe into a positive one?",
+    "How did I take care of my physical health today?",
+    "What relationship in my life needs more attention?",
+    "What am I avoiding, and why?",
+    "What small win can I celebrate today?",
+    "How did I show up as my best self today?"
+];
+
+function loadJournalPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    loadJournalEntries();
+    showRandomPrompt();
+}
+
+function showRandomPrompt() {
+    const prompt = guidedPrompts[Math.floor(Math.random() * guidedPrompts.length)];
+    document.getElementById('guidedPrompt').textContent = prompt;
+}
+
+function saveJournalEntry() {
+    const entry = document.getElementById('journalEntry').value.trim();
+    if (!entry) {
+        showNotification('Please write something before saving', 'error');
+        return;
+    }
+
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    const todayDate = getTodayDate();
+    
+    journals[todayDate] = {
+        date: todayDate,
+        content: entry,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('psychologyJournals', JSON.stringify(journals));
+    
+    showNotification('Journal entry saved successfully!', 'success');
+    document.getElementById('journalEntry').value = '';
+    loadJournalEntries();
+}
+
+function loadJournalEntries() {
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    const sortedDates = Object.keys(journals).sort().reverse();
+    
+    const container = document.getElementById('journalEntriesContainer');
+    if (sortedDates.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">No journal entries yet. Start writing to track your mental wellness journey!</p>';
+        return;
+    }
+
+    container.innerHTML = sortedDates.map(date => {
+        const entry = journals[date];
+        const entryDate = new Date(entry.date);
+        const displayDate = entryDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        return `
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-2 border-transparent hover:border-primary/30">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white">${displayDate}</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${new Date(entry.timestamp).toLocaleTimeString()}</p>
+                    </div>
+                    <button onclick="deleteJournal('${date}')" class="text-red-500 hover:text-red-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${entry.content}</p>
+            </div>
+        `;
+    }).join('');
+}
+
+function deleteJournal(date) {
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    delete journals[date];
+    localStorage.setItem('psychologyJournals', JSON.stringify(journals));
+    
+    showNotification('Journal entry deleted', 'success');
+    loadJournalEntries();
+}
+
+function usePrompt() {
+    const prompt = document.getElementById('guidedPrompt').textContent;
+    const textarea = document.getElementById('journalEntry');
+    textarea.value = prompt + '\n\n';
+    textarea.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function loadSettingsPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    document.getElementById('currentName').textContent = userName;
+    document.getElementById('nameInput').value = userName;
+}
+
+function updateName() {
+    const newName = document.getElementById('nameInput').value.trim();
+    if (newName === '') {
+        showNotification('Nama tidak boleh kosong', 'error');
+        return;
+    }
+    localStorage.setItem('userName', newName);
+    showNotification('Nama berhasil diperbarui!', 'success');
+    document.getElementById('currentName').textContent = newName;
+}
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+function confirmDelete() {
+    localStorage.clear();
+    showNotification('Semua data telah dihapus', 'success');
+    setTimeout(() => {
+        navigateTo('welcome');
+    }, 1000);
+}
+
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    
+    if (type === 'success') {
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-0';
+    } else {
+        notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-0';
+    }
+    
+    setTimeout(() => {
+        notification.className += ' translate-x-[500px]';
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
