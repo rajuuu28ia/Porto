@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MindTracker - Mental Wellness App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                "primary": "#19e5e6",
+                "background-light": "#f6f8f8",
+                "background-dark": "#112121",
+            },
+            fontFamily: {
+                "display": ["Inter"]
+            },
+            borderRadius: {
+                "DEFAULT": "0.5rem",
+                "lg": "1rem",
+                "xl": "1.5rem",
+                "full": "9999px"
+            },
+        },
+    },
+}
+</script>
+<style>
+body {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.page-section {
+    display: none;
+}
+.page-section.active {
+    display: block;
+}
+.mobile-menu {
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+.mobile-menu.active {
+    transform: translateX(0);
+}
+.mobile-menu-overlay {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+.mobile-menu-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+.dark-mode-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #e5e7eb;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.dark .dark-mode-toggle {
+    background: #374151;
+}
+.dark-mode-toggle::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.dark .dark-mode-toggle::before {
+    transform: translateX(30px);
+    background: #1f2937;
+}
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+
+<div id="welcome-page" class="page-section active">
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
+<div class="w-full max-w-2xl text-center">
+<h1 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">
+    Welcome To <span class="text-primary">MindTracker</span>
+</h1>
+<p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto">
+    Your journey to a healthier mind starts here. Track your mood, set goals, and discover insights to improve your well-being.
+</p>
+<button onclick="navigateTo('track-mood')" class="bg-primary text-gray-900 font-bold py-3 px-8 rounded-lg text-lg hover:bg-primary/80 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+    Get Started
+</button>
+</div>
+</div>
+</div>
+
+<div id="track-mood-page" class="page-section">
+<div class="min-h-screen flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-3">
+<div class="flex items-center gap-3 md:gap-4 text-gray-900 dark:text-white">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h2 class="text-lg md:text-xl font-bold">MindTracker</h2>
+</div>
+<div class="flex items-center gap-3">
+<div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('dashboard')">Home</a>
+<a class="text-primary font-bold cursor-pointer" onclick="navigateTo('track-mood')">Mood Tracker</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('analytics')">Analytics</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('breathe')">Breathe</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('journal')">Journal</a>
+<a class="hover:text-primary transition-colors cursor-pointer" onclick="navigateTo('settings')">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</header>
+<main class="flex-1 px-4 py-8 sm:px-6 md:px-10 lg:py-16">
+<div class="mx-auto max-w-4xl">
+<div class="text-center mb-12">
+<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">Track Your Mood Easily</h1>
+<p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Select how you're feeling every day and see your emotional trends</p>
+</div>
+<div class="bg-white dark:bg-background-dark rounded-xl shadow-lg p-8">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">How are you feeling today?</h2>
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Happy
+    <input checked="" class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="happy"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Content
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="content"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Neutral
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="neutral"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Sad
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="sad"/>
+</label>
+<label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+    Angry
+    <input class="absolute h-0 w-0 opacity-0" name="mood" type="radio" value="angry"/>
+</label>
+</div>
+<div class="mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">What were you doing?</h3>
+    <div class="flex flex-wrap gap-2" id="moodTags">
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Work
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="work"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Exercise
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="exercise"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Social
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="social"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Relax
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="relax"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Family
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="family"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Hobby
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="hobby"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Study
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="study"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Sleep
+            <input class="absolute h-0 w-0 opacity-0" type="checkbox" value="sleep"/>
+        </label>
+    </div>
+</div>
+<div class="mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Time of Day</h3>
+    <div class="flex flex-wrap gap-3">
+        <label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Morning
+            <input class="absolute h-0 w-0 opacity-0" name="timeOfDay" type="radio" value="morning"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Afternoon
+            <input class="absolute h-0 w-0 opacity-0" name="timeOfDay" type="radio" value="afternoon"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Evening
+            <input class="absolute h-0 w-0 opacity-0" name="timeOfDay" type="radio" value="evening"/>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-lg border-2 border-gray-200 dark:border-gray-700 px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+            Night
+            <input class="absolute h-0 w-0 opacity-0" name="timeOfDay" type="radio" value="night"/>
+        </label>
+    </div>
+</div>
+<div class="mt-8 text-center">
+    <button onclick="saveMoodWithDetails()" class="bg-primary hover:bg-primary/80 text-gray-900 dark:text-gray-900 font-bold py-4 px-12 rounded-lg text-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        Save Mood
+    </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<div id="name-page" class="page-section">
+<div class="flex flex-col min-h-screen">
+<header class="flex items-center justify-between px-6 py-4 border-b border-primary/20 dark:border-primary/30">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 text-black dark:text-white">
+<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold text-black dark:text-white">MindfulMe</h1>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-4">
+<div class="w-full max-w-md text-center">
+<h2 class="text-3xl font-bold text-black dark:text-white mb-2">What is your name?</h2>
+<p class="text-base text-black/60 dark:text-white/60 mb-8">e.g. Muhammad Hafidz</p>
+<div class="w-full mb-6">
+<label class="sr-only" for="name">Name</label>
+<input class="w-full px-4 py-3 bg-white/50 dark:bg-black/20 border border-primary/30 dark:border-primary/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 transition-all duration-300" id="name" name="name" placeholder="Sebutkan namamu" type="text" onkeypress="if(event.key==='Enter')saveNameFunc()"/>
+</div>
+<button onclick="saveNameFunc()" class="w-full bg-primary text-black dark:text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 dark:hover:bg-opacity-80 transition-colors duration-300">
+    Continue
+</button>
+</div>
+</main>
+</div>
+</div>
+
+<div id="dashboard-page" class="page-section"></div>
+
+<div id="missions-page" class="page-section"></div>
+
+<div id="calendar-page" class="page-section"></div>
+
+<div id="journal-page" class="page-section"></div>
+
+<div id="analytics-page" class="page-section"></div>
+
+<div id="breathe-page" class="page-section"></div>
+
+<div id="settings-page" class="page-section"></div>
+
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Day Details</h3>
+        <div class="space-y-3">
+            <p id="detailDate" class="text-lg text-primary font-semibold"></p>
+            <p id="detailMood" class="text-gray-700 dark:text-gray-300"></p>
+            <p id="detailMissions" class="text-gray-700 dark:text-gray-300"></p>
+        </div>
+        <button onclick="closeModal()" class="mt-6 w-full bg-primary text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 transition-colors">
+            Close
+        </button>
+    </div>
+</div>
+
+<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeDeleteModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Hapus Semua Data?</h3>
+            <p class="text-gray-600 dark:text-gray-300">
+                Tindakan ini akan menghapus semua data Anda termasuk nama, riwayat mood, dan progress misi. 
+                <strong class="text-red-600 dark:text-red-400">Tindakan ini tidak dapat dibatalkan.</strong>
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <button 
+                onclick="closeDeleteModal()" 
+                class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+                Batal
+            </button>
+            <button 
+                onclick="confirmDelete()" 
+                class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-[500px] transition-all duration-300">
+    <p id="notificationText" class="font-semibold"></p>
+</div>
+
+<div id="mobileMenuOverlay" class="mobile-menu-overlay fixed inset-0 bg-black/50 z-40" onclick="toggleMobileMenu()"></div>
+
+<div id="mobileMenu" class="mobile-menu fixed top-0 right-0 bottom-0 w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Menu</h2>
+        <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Dark Mode</span>
+            <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+        </div>
+    </div>
+    <nav class="p-6">
+        <div class="space-y-2">
+            <a onclick="navigateToAndCloseMobileMenu('dashboard')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="font-medium">Home</span>
+            </a>
+            <a onclick="navigateToAndCloseMobileMenu('track-mood')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-medium">Mood Tracker</span>
+            </a>
+            <a onclick="navigateToAndCloseMobileMenu('analytics')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span class="font-medium">Analytics</span>
+            </a>
+            <a onclick="navigateToAndCloseMobileMenu('breathe')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span class="font-medium">Breathe</span>
+            </a>
+            <a onclick="navigateToAndCloseMobileMenu('journal')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <span class="font-medium">Journal</span>
+            </a>
+            <a onclick="navigateToAndCloseMobileMenu('settings')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="font-medium">Settings</span>
+            </a>
+        </div>
+    </nav>
+</div>
+
+<script>
+let currentPage = 'welcome-page';
+let currentChartInstance = null;
+
+function initDarkMode() {
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'enabled') {
+        document.documentElement.classList.add('dark');
+    } else if (darkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+}
+
+function toggleDarkMode() {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('darkMode', 'disabled');
+    } else {
+        html.classList.add('dark');
+        localStorage.setItem('darkMode', 'enabled');
+    }
+}
+
+initDarkMode();
+
+function navigateTo(pageName) {
+    document.getElementById(currentPage).classList.remove('active');
+    currentPage = pageName + '-page';
+    document.getElementById(currentPage).classList.add('active');
+    
+    if (pageName === 'dashboard') {
+        createDashboard();
+        loadDashboard();
+    } else if (pageName === 'missions') {
+        createMissionsPage();
+        loadMissionsPage();
+    } else if (pageName === 'calendar') {
+        createCalendarPage();
+        renderCalendar();
+    } else if (pageName === 'journal') {
+        createJournalPage();
+        loadJournalPage();
+    } else if (pageName === 'analytics') {
+        createAnalyticsPage();
+        loadAnalyticsPage();
+    } else if (pageName === 'breathe') {
+        createBreathePage();
+    } else if (pageName === 'settings') {
+        createSettingsPage();
+        loadSettingsPage();
+    }
+    
+    window.scrollTo(0, 0);
+}
+
+function createDashboard() {
+    const container = document.getElementById('dashboard-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-primary font-bold">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Journal</a>
+<a onclick="navigateTo('missions')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Missions</a>
+<a onclick="navigateTo('calendar')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Calendar</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-6xl mx-auto">
+<div class="mb-8">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
+Welcome back, <span id="userName" class="text-primary">User</span>
+</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300">Continue your mental wellness journey</p>
+</div>
+<div class="grid md:grid-cols-4 gap-4 mb-8">
+<div class="bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl shadow-lg p-6 border border-primary/30">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Current Streak</h3>
+<div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+<path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
+</svg>
+</div>
+</div>
+<p class="text-3xl font-bold text-gray-900 dark:text-white"><span id="streakCount">0</span> days</p>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Consecutive tracking</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Total Moods</h3>
+<div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+</svg>
+</div>
+</div>
+<p class="text-3xl font-bold text-primary"><span id="totalMoods">0</span></p>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Moods recorded</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Missions Done</h3>
+<div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+</div>
+</div>
+<p class="text-3xl font-bold text-green-500"><span id="totalMissions">0</span></p>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Total missions</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">This Week</h3>
+<div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+</svg>
+</div>
+</div>
+<p class="text-3xl font-bold text-purple-500"><span id="weekMood">0</span></p>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Moods this week</p>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+<div class="flex items-center gap-2 mb-4">
+<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+</svg>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white">Your Mood Trend (Last 14 Days)</h3>
+</div>
+<div id="moodChartContainer" class="w-full" style="height: 300px;">
+<canvas id="moodChart"></canvas>
+</div>
+</div>
+<div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl shadow-lg p-6 mb-8">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+<svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+</svg>
+Your Achievements
+</h3>
+<div id="achievementsContainer" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Start tracking to unlock achievements</p>
+</div>
+</div>
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<div class="flex items-center gap-2 mb-3">
+<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white">Most Common Mood</h3>
+</div>
+<p class="text-2xl font-semibold text-primary mb-2"><span id="commonMood">No data yet</span></p>
+<p class="text-sm text-gray-600 dark:text-gray-300">The mood you experience most often</p>
+</div>
+<div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl shadow-lg p-6">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Daily Note</h3>
+<textarea id="dailyNote" placeholder="Write your thoughts for today..." class="w-full h-24 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 dark:text-white resize-none text-sm"></textarea>
+<button onclick="saveDailyNote()" class="mt-3 w-full bg-primary text-black font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 transition-colors">Save Note</button>
+<p id="noteStatus" class="text-sm mt-2"></p>
+<div id="previousNotes" class="mt-4 text-sm"></div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl shadow-lg p-6">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Daily Inspiration</h3>
+<p id="quoteText" class="text-gray-700 dark:text-gray-300 italic mb-2"></p>
+<p id="quoteAuthor" class="text-sm text-gray-600 dark:text-gray-400"></p>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function createMissionsPage() {
+    const container = document.getElementById('missions-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Journal</a>
+<a onclick="navigateTo('missions')" class="cursor-pointer text-primary font-bold">Missions</a>
+<a onclick="navigateTo('calendar')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Calendar</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-4xl mx-auto">
+<div class="mb-8">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">Daily Wellness Missions</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300">Complete your daily missions to improve your mental health</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Today's Progress</h3>
+<span id="progressPercent" class="text-2xl font-bold text-primary">0%</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2">
+<div id="progressBar" class="bg-gradient-to-r from-primary to-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+</div>
+<p id="progressText" class="text-sm text-gray-600 dark:text-gray-300">0 of 8 missions completed</p>
+</div>
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Meditation Guide</h3>
+<div class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden">
+<iframe width="100%" height="100%" src="https://www.youtube.com/embed/inpok4MKVLM" title="Meditation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-400">Morning meditation to start your day peacefully</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Light Exercise Guide</h3>
+<div class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden">
+<iframe width="100%" height="100%" src="https://www.youtube.com/embed/dWmqG67v0Fc" title="Exercise" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-400">15-minute light exercise for your health</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-xl shadow-lg p-6 border border-orange-200 dark:border-orange-900/30">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Morning Missions</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission1" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Wake up on time (before 7 AM)</span>
+</label>
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission2" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Drink a glass of water after waking up</span>
+</label>
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission3" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Meditate or stretch for 5 minutes</span>
+</label>
+</div>
+</div>
+<div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl shadow-lg p-6 border border-blue-200 dark:border-blue-900/30">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Afternoon Missions</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission4" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Walk or light exercise for 15 minutes</span>
+</label>
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission5" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Have a healthy and nutritious lunch</span>
+</label>
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission6" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Take a break from screens for 10 minutes</span>
+</label>
+</div>
+</div>
+<div class="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-xl shadow-lg p-6 border border-purple-200 dark:border-purple-900/30">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Evening Missions</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission7" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Write 3 things you're grateful for today</span>
+</label>
+<label class="flex items-center gap-3 p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors">
+<input type="checkbox" id="mission8" class="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary border-gray-300"/>
+<span class="text-gray-700 dark:text-gray-300 flex-1">Sleep before 11 PM</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function createCalendarPage() {
+    const container = document.getElementById('calendar-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Journal</a>
+<a onclick="navigateTo('missions')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Missions</a>
+<a onclick="navigateTo('calendar')" class="cursor-pointer text-primary font-bold">Calendar</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-6xl mx-auto">
+<div class="mb-8">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">Mood Calendar</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300">View your mood history and completed missions</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<div class="flex items-center justify-between mb-6">
+<button onclick="previousMonth()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+</svg>
+</button>
+<h3 id="currentMonth" class="text-2xl font-bold text-gray-900 dark:text-white"></h3>
+<button onclick="nextMonth()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+</svg>
+</button>
+</div>
+<div class="grid grid-cols-7 gap-2 mb-4">
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Sun</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Mon</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Tue</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Wed</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Thu</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Fri</div>
+<div class="text-center font-semibold text-gray-600 dark:text-gray-400 text-sm">Sat</div>
+</div>
+<div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
+</div>
+<div class="mt-8 grid md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+</svg>
+Mood Legend
+</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 bg-green-500 rounded-full"></span>
+<span class="text-gray-700 dark:text-gray-300">Happy</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 bg-blue-500 rounded-full"></span>
+<span class="text-gray-700 dark:text-gray-300">Content</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 bg-gray-500 rounded-full"></span>
+<span class="text-gray-700 dark:text-gray-300">Neutral</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 bg-orange-500 rounded-full"></span>
+<span class="text-gray-700 dark:text-gray-300">Sad</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 bg-red-500 rounded-full"></span>
+<span class="text-gray-700 dark:text-gray-300">Angry</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Monthly Statistics</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+<span class="text-gray-700 dark:text-gray-300">Total Moods Tracked</span>
+<span class="font-bold text-primary">0</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+<span class="text-gray-700 dark:text-gray-300">Total Missions Done</span>
+<span class="font-bold text-primary">0</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+<span class="text-gray-700 dark:text-gray-300">Longest Streak</span>
+<span class="font-bold text-primary">0 days</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function createJournalPage() {
+    const container = document.getElementById('journal-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-primary font-bold">Journal</a>
+<a onclick="navigateTo('missions')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Missions</a>
+<a onclick="navigateTo('calendar')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Calendar</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-4xl mx-auto">
+<div class="mb-8">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">Psychology Journal</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300">Reflect on your thoughts, feelings, and experiences</p>
+</div>
+<div class="bg-gradient-to-br from-primary/10 to-blue-400/10 rounded-xl shadow-lg p-6 mb-8 border border-primary/30">
+<div class="flex items-start gap-3">
+<svg class="w-6 h-6 text-primary flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+</svg>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Today's Guided Prompt</h3>
+<p id="guidedPrompt" class="text-gray-700 dark:text-gray-300 italic mb-3"></p>
+<button onclick="usePrompt()" class="bg-primary text-black font-medium py-2 px-4 rounded-lg hover:bg-opacity-80 transition-colors text-sm">
+Use This Prompt
+</button>
+<button onclick="showRandomPrompt()" class="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm">
+Get New Prompt
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Write Your Journal Entry</h3>
+<textarea 
+id="journalEntry" 
+placeholder="Express your thoughts freely. This is a safe space for reflection..."
+class="w-full h-64 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 dark:text-white resize-none"
+></textarea>
+<div class="flex flex-col sm:flex-row gap-3 mt-4">
+<button 
+onclick="saveJournalEntry()" 
+class="flex-1 bg-primary text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 transition-colors duration-300"
+>
+Save Journal Entry
+</button>
+<button 
+onclick="document.getElementById('journalEntry').value=''" 
+class="sm:flex-none bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+>
+Clear
+</button>
+</div>
+</div>
+<div class="mb-6">
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your Journal Entries</h3>
+</div>
+<div id="journalEntriesContainer" class="space-y-4">
+<p class="text-center text-gray-500 dark:text-gray-400 py-8">No journal entries yet. Start writing to track your mental wellness journey!</p>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function createSettingsPage() {
+    const container = document.getElementById('settings-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Journal</a>
+<a onclick="navigateTo('missions')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Missions</a>
+<a onclick="navigateTo('calendar')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Calendar</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-primary font-bold">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-3xl mx-auto">
+<div class="mb-8">
+<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">Settings</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300">Manage your profile and preferences</p>
+</div>
+<div class="space-y-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Informasi Profil</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+Nama Saat Ini
+</label>
+<p id="currentName" class="text-lg font-semibold text-primary">User</p>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="nameInput">
+Ubah Nama
+</label>
+<input 
+type="text" 
+id="nameInput" 
+class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 dark:text-white"
+placeholder="Masukkan nama baru"
+/>
+</div>
+<button 
+onclick="updateName()" 
+class="bg-primary text-black font-bold py-3 px-6 rounded-lg hover:bg-opacity-80 transition-colors duration-300"
+>
+Simpan Perubahan
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Tentang Aplikasi</h3>
+<div class="space-y-3 text-gray-600 dark:text-gray-300">
+<p><strong>Versi:</strong> 1.0.0</p>
+<p><strong>Dikembangkan oleh:</strong> MindTracker Team</p>
+<p class="text-sm">
+MindTracker adalah aplikasi kesehatan mental yang membantu Anda melacak mood, menyelesaikan misi harian, dan meningkatkan kesejahteraan mental Anda.
+</p>
+</div>
+</div>
+<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-red-900 dark:text-red-400 mb-4">Zona Bahaya</h3>
+<p class="text-red-700 dark:text-red-300 mb-4">
+Tindakan di bawah ini akan menghapus semua data Anda dan tidak dapat dibatalkan.
+</p>
+<button 
+onclick="showDeleteModal()" 
+class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+>
+Hapus Semua Data
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function saveMoodWithDetails() {
+    const moodInput = document.querySelector('input[name="mood"]:checked');
+    if (!moodInput) {
+        showNotification('Please select a mood first!', 'error');
+        return;
+    }
+    
+    const mood = moodInput.value;
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const timestamp = today.toISOString();
+    
+    const selectedTags = [];
+    document.querySelectorAll('#moodTags input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedTags.push(checkbox.value);
+    });
+    
+    const timeOfDayInput = document.querySelector('input[name="timeOfDay"]:checked');
+    const timeOfDay = timeOfDayInput ? timeOfDayInput.value : detectTimeOfDay();
+    
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    moodHistory[dateStr] = mood;
+    localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
+    
+    const moodDetails = JSON.parse(localStorage.getItem('moodDetails') || '{}');
+    moodDetails[dateStr] = {
+        mood: mood,
+        tags: selectedTags,
+        timeOfDay: timeOfDay,
+        timestamp: timestamp
+    };
+    localStorage.setItem('moodDetails', JSON.stringify(moodDetails));
+    
+    showNotification('Mood saved successfully!', 'success');
+    
+    setTimeout(() => {
+        const userName = localStorage.getItem('userName');
+        if (userName) {
+            navigateTo('dashboard');
+        } else {
+            navigateTo('name');
+        }
+    }, 1000);
+}
+
+function detectTimeOfDay() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+}
+
+function saveNameFunc() {
+    const nameInput = document.getElementById('name');
+    const name = nameInput.value.trim();
+    
+    if (name === '') {
+        alert('Silakan masukkan nama Anda terlebih dahulu');
+        return;
+    }
+    
+    localStorage.setItem('userName', name);
+    navigateTo('dashboard');
+}
+
+function loadDashboard() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    document.getElementById('userName').textContent = userName;
+    loadStatistics();
+    loadQuote();
+    loadDailyNote();
+    loadPreviousNotes();
+    loadMoodChart();
+}
+
+function loadStatistics() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const missionHistory = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    
+    const streak = calculateStreak(moodHistory);
+    const totalMoods = Object.keys(moodHistory).length;
+    const totalMissions = Object.values(missionHistory).reduce((a, b) => a + b, 0);
+    const mostCommonMood = getMostCommonMood(moodHistory);
+    const thisWeekMoods = getThisWeekMoods(moodHistory);
+    
+    document.getElementById('streakCount').textContent = streak;
+    document.getElementById('totalMoods').textContent = totalMoods;
+    document.getElementById('totalMissions').textContent = totalMissions;
+    document.getElementById('commonMood').textContent = mostCommonMood;
+    document.getElementById('weekMood').textContent = thisWeekMoods;
+    
+    const achievements = calculateAchievements(totalMoods, totalMissions, streak);
+    displayAchievements(achievements);
+}
+
+function calculateStreak(moodHistory) {
+    const dates = Object.keys(moodHistory).sort().reverse();
+    if (dates.length === 0) return 0;
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    for (let i = 0; i < dates.length; i++) {
+        const checkDate = new Date(dates[i]);
+        const expectedDate = new Date(today);
+        expectedDate.setDate(today.getDate() - i);
+        expectedDate.setHours(0,0,0,0);
+        
+        if (checkDate.getTime() === expectedDate.getTime()) {
+            streak++;
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
+
+function getMostCommonMood(moodHistory) {
+    const moods = Object.values(moodHistory);
+    if (moods.length === 0) return 'No data yet';
+    
+    const count = {};
+    moods.forEach(mood => count[mood] = (count[mood] || 0) + 1);
+    
+    const moodLabels = {
+        happy: 'Happy', 
+        content: 'Content', 
+        neutral: 'Neutral', 
+        sad: 'Sad', 
+        angry: 'Angry'
+    };
+    const most = Object.keys(count).reduce((a, b) => count[a] > count[b] ? a : b);
+    return moodLabels[most] || 'No data yet';
+}
+
+function getThisWeekMoods(moodHistory) {
+    const today = new Date();
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    const weekMoods = Object.entries(moodHistory).filter(([date]) => {
+        const d = new Date(date);
+        return d >= weekAgo && d <= today;
+    });
+    
+    return weekMoods.length;
+}
+
+function calculateAchievements(totalMoods, totalMissions, streak) {
+    const achievements = [];
+    
+    if (streak >= 3) achievements.push({
+        badge: 'STREAK', 
+        title: '3 Day Streak', 
+        desc: 'Consistent tracking',
+        color: 'from-orange-500 to-red-500'
+    });
+    if (streak >= 7) achievements.push({
+        badge: 'WEEK', 
+        title: 'Weekly Streak', 
+        desc: 'Outstanding!',
+        color: 'from-yellow-500 to-orange-500'
+    });
+    if (totalMoods >= 10) achievements.push({
+        badge: 'PRO', 
+        title: 'Mood Tracker Pro', 
+        desc: '10+ moods tracked',
+        color: 'from-blue-500 to-cyan-500'
+    });
+    if (totalMissions >= 20) achievements.push({
+        badge: 'MASTER', 
+        title: 'Mission Master', 
+        desc: '20+ missions completed',
+        color: 'from-green-500 to-emerald-500'
+    });
+    if (totalMoods >= 30) achievements.push({
+        badge: 'ELITE', 
+        title: 'Dedication Award', 
+        desc: '30+ days tracking',
+        color: 'from-purple-500 to-pink-500'
+    });
+    
+    return achievements;
+}
+
+function displayAchievements(achievements) {
+    const container = document.getElementById('achievementsContainer');
+    if (achievements.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Start tracking to unlock achievements</p>';
+        return;
+    }
+    
+    container.innerHTML = achievements.map(ach => `
+        <div class="bg-white dark:bg-gray-800 border-2 border-transparent hover:border-primary/50 rounded-xl p-4 transition-all">
+            <div class="inline-block bg-gradient-to-r ${ach.color} text-white text-xs font-bold px-3 py-1 rounded-full mb-2">
+                ${ach.badge}
+            </div>
+            <h4 class="font-bold text-sm text-gray-900 dark:text-white mb-1">${ach.title}</h4>
+            <p class="text-xs text-gray-600 dark:text-gray-400">${ach.desc}</p>
+        </div>
+    `).join('');
+}
+
+function loadQuote() {
+    const quotes = [
+        {text: "Mental health is the key to unlocking your full potential.", author: "MindTracker"},
+        {text: "A journey of a thousand miles begins with a single step.", author: "Lao Tzu"},
+        {text: "A healthy mind is the foundation of a happy life.", author: "MindTracker"},
+        {text: "Every day is a new opportunity to become better.", author: "Unknown"},
+        {text: "Taking care of mental health is as important as caring for your body.", author: "MindTracker"}
+    ];
+    
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('quoteText').textContent = `"${randomQuote.text}"`;
+    document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
+}
+
+function getTodayDate() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function saveDailyNote() {
+    const note = document.getElementById('dailyNote').value.trim();
+    if (!note) {
+        document.getElementById('noteStatus').textContent = 'Note is empty!';
+        document.getElementById('noteStatus').className = 'text-sm text-red-500 mt-2';
+        return;
+    }
+    
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    notes[getTodayDate()] = note;
+    localStorage.setItem('dailyNotes', JSON.stringify(notes));
+    
+    document.getElementById('noteStatus').textContent = 'Note saved successfully!';
+    document.getElementById('noteStatus').className = 'text-sm text-green-500 mt-2';
+    setTimeout(() => {
+        document.getElementById('noteStatus').textContent = '';
+    }, 3000);
+    
+    loadPreviousNotes();
+}
+
+function loadDailyNote() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    const todayNote = notes[getTodayDate()];
+    if (todayNote) {
+        document.getElementById('dailyNote').value = todayNote;
+    }
+}
+
+function loadPreviousNotes() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes') || '{}');
+    const sortedDates = Object.keys(notes).sort().reverse().slice(1, 4);
+    
+    const container = document.getElementById('previousNotes');
+    if (sortedDates.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No previous notes</p>';
+        return;
+    }
+    
+    container.innerHTML = sortedDates.map(date => `
+        <div class="text-sm">
+            <p class="font-semibold text-gray-700 dark:text-gray-300">${date}</p>
+            <p class="text-gray-600 dark:text-gray-400 line-clamp-2">${notes[date]}</p>
+        </div>
+    `).join('<hr class="my-2 border-gray-200 dark:border-gray-700">');
+}
+
+function loadMoodChart() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const sortedDates = Object.keys(moodHistory).sort().slice(-14);
+    
+    if (sortedDates.length === 0) {
+        document.getElementById('moodChartContainer').innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">No mood data yet. Start tracking to see your trends!</p>';
+        return;
+    }
+    
+    const moodValues = {
+        'angry': 1,
+        'sad': 2,
+        'neutral': 3,
+        'content': 4,
+        'happy': 5
+    };
+    
+    const data = sortedDates.map(date => ({
+        x: date,
+        y: moodValues[moodHistory[date]] || 3
+    }));
+    
+    if (currentChartInstance) {
+        currentChartInstance.destroy();
+    }
+    
+    const ctx = document.getElementById('moodChart').getContext('2d');
+    currentChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Mood Trend',
+                data: data,
+                borderColor: '#19e5e6',
+                backgroundColor: 'rgba(25, 229, 230, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#19e5e6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const moodLabels = ['', 'Angry', 'Sad', 'Neutral', 'Content', 'Happy'];
+                            return moodLabels[context.parsed.y];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    ticks: {
+                        maxRotation: 0,
+                        minRotation: 0,
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            const moodLabels = ['', 'Angry', 'Sad', 'Neutral', 'Content', 'Happy'];
+                            return moodLabels[value];
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function loadMissionsPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    loadMissions();
+}
+
+function loadMissions() {
+    const missions = JSON.parse(localStorage.getItem('missions') || '{}');
+    const checkboxes = document.querySelectorAll('#missions-page input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (missions[checkbox.id]) {
+            checkbox.checked = true;
+        }
+        checkbox.addEventListener('change', saveMission);
+    });
+    updateProgress();
+}
+
+function saveMission(e) {
+    const missions = JSON.parse(localStorage.getItem('missions') || '{}');
+    missions[e.target.id] = e.target.checked;
+    localStorage.setItem('missions', JSON.stringify(missions));
+    updateProgress();
+    saveDailyHistory();
+}
+
+function updateProgress() {
+    const total = document.querySelectorAll('#missions-page input[type="checkbox"]').length;
+    const completed = document.querySelectorAll('#missions-page input[type="checkbox"]:checked').length;
+    const percentage = Math.round((completed / total) * 100);
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = `${completed} of ${total} missions completed`;
+    document.getElementById('progressPercent').textContent = `${percentage}%`;
+}
+
+function saveDailyHistory() {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const completed = document.querySelectorAll('#missions-page input[type="checkbox"]:checked').length;
+    
+    const missionHistory = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    missionHistory[dateStr] = completed;
+    localStorage.setItem('missionHistory', JSON.stringify(missionHistory));
+}
+
+let currentDate = new Date();
+
+function renderCalendar() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    
+    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const calendarGrid = document.getElementById('calendarGrid');
+    calendarGrid.innerHTML = '';
+    
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        calendarGrid.appendChild(emptyCell);
+    }
+    
+    const moodData = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const missionData = JSON.parse(localStorage.getItem('missionHistory') || '{}');
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const mood = moodData[dateStr];
+        const missions = missionData[dateStr];
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'min-h-[80px] p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors';
+        
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+            dayCell.className += ' ring-2 ring-primary bg-primary/5';
+        }
+        
+        let moodBadge = '';
+        let moodColor = '';
+        if (mood === 'happy') {
+            moodBadge = 'Happy';
+            moodColor = 'bg-green-500';
+        } else if (mood === 'content') {
+            moodBadge = 'Content';
+            moodColor = 'bg-blue-500';
+        } else if (mood === 'neutral') {
+            moodBadge = 'Neutral';
+            moodColor = 'bg-gray-500';
+        } else if (mood === 'sad') {
+            moodBadge = 'Sad';
+            moodColor = 'bg-orange-500';
+        } else if (mood === 'angry') {
+            moodBadge = 'Angry';
+            moodColor = 'bg-red-500';
+        }
+        
+        dayCell.innerHTML = `
+            <div class="text-sm font-semibold text-gray-900 dark:text-white mb-2">${day}</div>
+            ${moodBadge ? `<div class="inline-block ${moodColor} text-white text-xs font-medium px-2 py-0.5 rounded-full mb-1">${moodBadge}</div>` : ''}
+            ${missions ? `<div class="text-xs text-primary font-medium">${missions} missions</div>` : ''}
+        `;
+        
+        dayCell.onclick = () => showDayDetails(dateStr, mood, missions);
+        calendarGrid.appendChild(dayCell);
+    }
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function showDayDetails(date, mood, missions) {
+    const modal = document.getElementById('detailModal');
+    const moodText = mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : 'No data yet';
+    const missionText = missions ? `${missions} missions completed` : 'No data yet';
+    
+    let moodColor = 'text-gray-600 dark:text-gray-400';
+    if (mood === 'happy') moodColor = 'text-green-600 dark:text-green-400';
+    else if (mood === 'content') moodColor = 'text-blue-600 dark:text-blue-400';
+    else if (mood === 'neutral') moodColor = 'text-gray-600 dark:text-gray-400';
+    else if (mood === 'sad') moodColor = 'text-orange-600 dark:text-orange-400';
+    else if (mood === 'angry') moodColor = 'text-red-600 dark:text-red-400';
+    
+    document.getElementById('detailDate').textContent = date;
+    document.getElementById('detailMood').textContent = `Mood: ${moodText}`;
+    document.getElementById('detailMood').className = `text-lg font-semibold ${moodColor}`;
+    document.getElementById('detailMissions').textContent = `Missions: ${missionText}`;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('detailModal').classList.add('hidden');
+}
+
+const guidedPrompts = [
+    "What are three things I'm grateful for today?",
+    "What emotions did I experience today, and what triggered them?",
+    "What challenge did I face today, and how did I handle it?",
+    "What did I learn about myself today?",
+    "What positive actions did I take for my mental health today?",
+    "How can I be kinder to myself tomorrow?",
+    "What patterns am I noticing in my thoughts or behaviors?",
+    "What boundaries do I need to set for my well-being?",
+    "What brings me joy, and how can I incorporate more of it?",
+    "What negative thought can I reframe into a positive one?",
+    "How did I take care of my physical health today?",
+    "What relationship in my life needs more attention?",
+    "What am I avoiding, and why?",
+    "What small win can I celebrate today?",
+    "How did I show up as my best self today?"
+];
+
+function loadJournalPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    loadJournalEntries();
+    showRandomPrompt();
+}
+
+function showRandomPrompt() {
+    const prompt = guidedPrompts[Math.floor(Math.random() * guidedPrompts.length)];
+    document.getElementById('guidedPrompt').textContent = prompt;
+}
+
+function saveJournalEntry() {
+    const entry = document.getElementById('journalEntry').value.trim();
+    if (!entry) {
+        showNotification('Please write something before saving', 'error');
+        return;
+    }
+
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    const todayDate = getTodayDate();
+    
+    journals[todayDate] = {
+        date: todayDate,
+        content: entry,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('psychologyJournals', JSON.stringify(journals));
+    
+    showNotification('Journal entry saved successfully!', 'success');
+    document.getElementById('journalEntry').value = '';
+    loadJournalEntries();
+}
+
+function loadJournalEntries() {
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    const sortedDates = Object.keys(journals).sort().reverse();
+    
+    const container = document.getElementById('journalEntriesContainer');
+    if (sortedDates.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">No journal entries yet. Start writing to track your mental wellness journey!</p>';
+        return;
+    }
+
+    container.innerHTML = sortedDates.map(date => {
+        const entry = journals[date];
+        const entryDate = new Date(entry.date);
+        const displayDate = entryDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        return `
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-2 border-transparent hover:border-primary/30">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white">${displayDate}</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${new Date(entry.timestamp).toLocaleTimeString()}</p>
+                    </div>
+                    <button onclick="deleteJournal('${date}')" class="text-red-500 hover:text-red-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${entry.content}</p>
+            </div>
+        `;
+    }).join('');
+}
+
+function deleteJournal(date) {
+    const journals = JSON.parse(localStorage.getItem('psychologyJournals') || '{}');
+    delete journals[date];
+    localStorage.setItem('psychologyJournals', JSON.stringify(journals));
+    
+    showNotification('Journal entry deleted', 'success');
+    loadJournalEntries();
+}
+
+function usePrompt() {
+    const prompt = document.getElementById('guidedPrompt').textContent;
+    const textarea = document.getElementById('journalEntry');
+    textarea.value = prompt + '\n\n';
+    textarea.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function loadSettingsPage() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        navigateTo('welcome');
+        return;
+    }
+    document.getElementById('currentName').textContent = userName;
+    document.getElementById('nameInput').value = userName;
+}
+
+function updateName() {
+    const newName = document.getElementById('nameInput').value.trim();
+    if (newName === '') {
+        showNotification('Nama tidak boleh kosong', 'error');
+        return;
+    }
+    localStorage.setItem('userName', newName);
+    showNotification('Nama berhasil diperbarui!', 'success');
+    document.getElementById('currentName').textContent = newName;
+}
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+function confirmDelete() {
+    localStorage.clear();
+    showNotification('Semua data telah dihapus', 'success');
+    setTimeout(() => {
+        navigateTo('welcome');
+    }, 1000);
+}
+
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    
+    if (type === 'success') {
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-0 z-50';
+    } else {
+        notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-0 z-50';
+    }
+    
+    setTimeout(() => {
+        if (type === 'success') {
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-[500px] z-50';
+        } else {
+            notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-[500px] z-50';
+        }
+    }, 2500);
+}
+
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    
+    mobileMenu.classList.toggle('active');
+    mobileMenuOverlay.classList.toggle('active');
+    
+    if (mobileMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+}
+
+function navigateToAndCloseMobileMenu(pageName) {
+    toggleMobileMenu();
+    navigateTo(pageName);
+}
+
+function createAnalyticsPage() {
+    const container = document.getElementById('analytics-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+<header class="bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 md:w-8 md:h-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_543)">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</g>
+</svg>
+</div>
+<h1 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">MindTracker Analytics</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"></div>
+<nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a onclick="navigateTo('dashboard')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Home</a>
+<a onclick="navigateTo('track-mood')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Mood Tracker</a>
+<a onclick="navigateTo('analytics')" class="cursor-pointer text-primary font-bold">Analytics</a>
+<a onclick="navigateTo('breathe')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Breathe</a>
+<a onclick="navigateTo('journal')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Journal</a>
+<a onclick="navigateTo('settings')" class="cursor-pointer text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Settings</a>
+</nav>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-10 py-8">
+<div class="max-w-7xl mx-auto space-y-8">
+<div class="flex justify-between items-center">
+<div>
+<h2 class="text-4xl font-bold text-gray-900 dark:text-white">Mood Analytics & Insights</h2>
+<p class="text-gray-600 dark:text-gray-300 mt-2">Deep dive into your mood patterns and trends</p>
+</div>
+<div class="flex flex-col gap-2">
+<button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+</svg>
+Export CSV
+</button>
+<button onclick="generateWeeklyReport()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+</svg>
+Weekly Report
+</button>
+</div>
+</div>
+
+<div id="moodPrediction" class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg p-6 text-white"></div>
+
+<div id="trendAlert" class="hidden bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg p-6 text-white mb-6"></div>
+
+<div class="grid md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Mood Frequency Distribution</h3>
+<canvas id="moodPieChart" class="max-h-64"></canvas>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Mood by Time of Day</h3>
+<canvas id="timeOfDayChart" class="max-h-64"></canvas>
+</div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">30-Day Mood Trends</h3>
+<div style="height: 300px;">
+<canvas id="weeklyTrendChart"></canvas>
+</div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Activity & Mood Insights</h3>
+<div id="activityInsights" class="space-y-3"></div>
+</div>
+
+<div id="weeklyReportCard" class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg p-8 text-white"></div>
+
+<div id="socialShareCard" class="bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl shadow-lg p-6 text-white"></div>
+</div>
+</main>
+</div>
+    `;
+}
+
+function loadAnalyticsPage() {
+    loadMoodPieChart();
+    loadTimeOfDayChart();
+    loadWeeklyTrendChart();
+    loadActivityInsights();
+    loadMoodPrediction();
+    loadTrendAnalysis();
+    createWeeklyReportCard();
+    createSocialShareCard();
+}
+
+function loadMoodPieChart() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const moodCounts = { happy: 0, content: 0, neutral: 0, sad: 0, angry: 0 };
+    
+    Object.values(moodHistory).forEach(mood => {
+        if (moodCounts[mood] !== undefined) {
+            moodCounts[mood]++;
+        }
+    });
+    
+    const ctx = document.getElementById('moodPieChart');
+    if (!ctx) return;
+    
+    new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Happy', 'Content', 'Neutral', 'Sad', 'Angry'],
+            datasets: [{
+                data: [moodCounts.happy, moodCounts.content, moodCounts.neutral, moodCounts.sad, moodCounts.angry],
+                backgroundColor: ['#10b981', '#3b82f6', '#6b7280', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#9ca3af', padding: 15, font: { size: 12 } }
+                }
+            }
+        }
+    });
+}
+
+function loadTimeOfDayChart() {
+    const moodDetails = JSON.parse(localStorage.getItem('moodDetails') || '{}');
+    const timeData = { morning: { happy: 0, sad: 0, total: 0 }, afternoon: { happy: 0, sad: 0, total: 0 }, evening: { happy: 0, sad: 0, total: 0 }, night: { happy: 0, sad: 0, total: 0 } };
+    
+    Object.values(moodDetails).forEach(entry => {
+        if (entry.timeOfDay && timeData[entry.timeOfDay]) {
+            timeData[entry.timeOfDay].total++;
+            if (entry.mood === 'happy' || entry.mood === 'content') {
+                timeData[entry.timeOfDay].happy++;
+            } else if (entry.mood === 'sad' || entry.mood === 'angry') {
+                timeData[entry.timeOfDay].sad++;
+            }
+        }
+    });
+    
+    const ctx = document.getElementById('timeOfDayChart');
+    if (!ctx) return;
+    
+    new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+            datasets: [
+                {
+                    label: 'Happy/Content',
+                    data: [timeData.morning.happy, timeData.afternoon.happy, timeData.evening.happy, timeData.night.happy],
+                    backgroundColor: '#10b981'
+                },
+                {
+                    label: 'Sad/Angry',
+                    data: [timeData.morning.sad, timeData.afternoon.sad, timeData.evening.sad, timeData.night.sad],
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#9ca3af' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#9ca3af' },
+                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                },
+                x: {
+                    ticks: { color: '#9ca3af' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function loadWeeklyTrendChart() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const last30Days = [];
+    const today = new Date();
+    
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        last30Days.push(dateStr);
+    }
+    
+    const moodValues = { 'angry': 1, 'sad': 2, 'neutral': 3, 'content': 4, 'happy': 5 };
+    const data = last30Days.map(date => ({
+        x: date,
+        y: moodHistory[date] ? moodValues[moodHistory[date]] : null
+    }));
+    
+    const ctx = document.getElementById('weeklyTrendChart');
+    if (!ctx) return;
+    
+    new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Mood Trend (30 Days)',
+                data: data,
+                borderColor: '#19e5e6',
+                backgroundColor: 'rgba(25, 229, 230, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#19e5e6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#9ca3af' }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    ticks: { maxRotation: 0, minRotation: 0, color: '#9ca3af' },
+                    grid: { display: false }
+                },
+                y: {
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            const labels = ['', 'Angry', 'Sad', 'Neutral', 'Content', 'Happy'];
+                            return labels[value];
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                }
+            }
+        }
+    });
+}
+
+function loadActivityInsights() {
+    const moodDetails = JSON.parse(localStorage.getItem('moodDetails') || '{}');
+    const activityMoods = {};
+    
+    Object.values(moodDetails).forEach(entry => {
+        if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tag => {
+                if (!activityMoods[tag]) {
+                    activityMoods[tag] = { happy: 0, sad: 0, total: 0 };
+                }
+                activityMoods[tag].total++;
+                if (entry.mood === 'happy' || entry.mood === 'content') {
+                    activityMoods[tag].happy++;
+                } else if (entry.mood === 'sad' || entry.mood === 'angry') {
+                    activityMoods[tag].sad++;
+                }
+            });
+        }
+    });
+    
+    const container = document.getElementById('activityInsights');
+    if (!container) return;
+    
+    if (Object.keys(activityMoods).length === 0) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Start tagging your moods to see activity insights!</p>';
+        return;
+    }
+    
+    const insights = Object.entries(activityMoods)
+        .map(([activity, data]) => ({
+            activity,
+            happiness: data.total > 0 ? (data.happy / data.total * 100).toFixed(0) : 0,
+            total: data.total
+        }))
+        .sort((a, b) => b.happiness - a.happiness);
+    
+    container.innerHTML = insights.map(insight => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span class="text-2xl">${getActivityEmoji(insight.activity)}</span>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-900 dark:text-white capitalize">${insight.activity}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${insight.total} entries</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-2xl font-bold ${insight.happiness >= 70 ? 'text-green-500' : insight.happiness >= 40 ? 'text-yellow-500' : 'text-red-500'}">${insight.happiness}%</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Happiness</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getActivityEmoji(activity) {
+    const emojis = {
+        work: '💼',
+        exercise: '🏃',
+        social: '👥',
+        relax: '😌',
+        family: '👨‍👩‍👧‍👦',
+        hobby: '🎨',
+        study: '📚',
+        sleep: '😴'
+    };
+    return emojis[activity] || '📌';
+}
+
+function loadMoodPrediction() {
+    const moodDetails = JSON.parse(localStorage.getItem('moodDetails') || '{}');
+    const entries = Object.values(moodDetails);
+    
+    if (entries.length < 7) {
+        document.getElementById('moodPrediction').innerHTML = `
+            <div class="flex items-center gap-4">
+                <div class="text-4xl">🔮</div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-2">Mood Prediction AI</h3>
+                    <p>Track your mood for at least 7 days to unlock AI-powered predictions!</p>
+                    <p class="text-sm mt-1 opacity-90">${entries.length}/7 days recorded</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    const recentEntries = entries.slice(-14);
+    const morningMoods = recentEntries.filter(e => e.timeOfDay === 'morning');
+    const avgMorningMood = morningMoods.length > 0 
+        ? morningMoods.reduce((sum, e) => sum + getMoodScore(e.mood), 0) / morningMoods.length 
+        : 3;
+    
+    const prediction = avgMorningMood >= 4 ? 'positive' : avgMorningMood >= 3 ? 'neutral' : 'challenging';
+    const confidence = Math.min(95, 60 + (entries.length * 2));
+    
+    document.getElementById('moodPrediction').innerHTML = `
+        <div class="flex items-center gap-4">
+            <div class="text-5xl">🔮</div>
+            <div class="flex-1">
+                <h3 class="text-2xl font-bold mb-2">Tomorrow's Mood Prediction</h3>
+                <p class="text-xl">Based on your patterns, tomorrow morning you'll likely feel <strong>${prediction}</strong></p>
+                <p class="text-sm mt-2 opacity-90">Confidence: ${confidence}% (based on ${entries.length} days of data)</p>
+                <p class="text-xs mt-2 opacity-75">💡 Tip: ${getPredictionTip(prediction)}</p>
+            </div>
+        </div>
+    `;
+}
+
+function getMoodScore(mood) {
+    const scores = { angry: 1, sad: 2, neutral: 3, content: 4, happy: 5 };
+    return scores[mood] || 3;
+}
+
+function getPredictionTip(prediction) {
+    const tips = {
+        positive: 'Great! Start your day with gratitude to maintain this positive trend.',
+        neutral: 'Consider planning something enjoyable tomorrow to boost your mood.',
+        challenging: 'Plan some self-care activities and reach out to supportive friends.'
+    };
+    return tips[prediction] || 'Keep tracking to get personalized insights!';
+}
+
+function loadTrendAnalysis() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const dates = Object.keys(moodHistory).sort();
+    
+    if (dates.length < 14) return;
+    
+    const thisWeek = dates.slice(-7);
+    const lastWeek = dates.slice(-14, -7);
+    
+    const thisWeekScore = thisWeek.reduce((sum, date) => sum + getMoodScore(moodHistory[date]), 0) / thisWeek.length;
+    const lastWeekScore = lastWeek.reduce((sum, date) => sum + getMoodScore(moodHistory[date]), 0) / lastWeek.length;
+    
+    const improvement = ((thisWeekScore - lastWeekScore) / lastWeekScore * 100).toFixed(0);
+    
+    if (Math.abs(improvement) >= 10) {
+        const trendAlert = document.getElementById('trendAlert');
+        trendAlert.classList.remove('hidden');
+        trendAlert.innerHTML = `
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-center md:text-left">
+                <div class="text-4xl md:text-5xl">${improvement > 0 ? '📈' : '📉'}</div>
+                <div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-2">Trend Alert!</h3>
+                    <p class="text-base md:text-xl">You're <strong>${Math.abs(improvement)}% ${improvement > 0 ? 'happier' : 'less happy'}</strong> this week compared to last week!</p>
+                    <p class="text-sm mt-1 opacity-90">${improvement > 0 ? 'Keep up the great work!' : 'Take some time for self-care.'}</p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function createWeeklyReportCard() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const dates = Object.keys(moodHistory).sort();
+    const last7Days = dates.slice(-7);
+    
+    if (last7Days.length === 0) return;
+    
+    const avgScore = last7Days.reduce((sum, date) => sum + getMoodScore(moodHistory[date]), 0) / last7Days.length;
+    const grade = avgScore >= 4.5 ? 'A+' : avgScore >= 4 ? 'A' : avgScore >= 3.5 ? 'B+' : avgScore >= 3 ? 'B' : avgScore >= 2.5 ? 'C' : 'D';
+    const streak = calculateStreak(moodHistory);
+    
+    document.getElementById('weeklyReportCard').innerHTML = `
+        <div class="text-center px-4">
+            <h3 class="text-2xl md:text-3xl font-bold mb-4">Weekly Mood Report Card</h3>
+            <div class="text-6xl md:text-8xl font-black mb-4">${grade}</div>
+            <p class="text-lg md:text-xl mb-4">Your mood score this week: ${avgScore.toFixed(1)}/5.0</p>
+            <div class="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mt-6">
+                <div class="text-center">
+                    <p class="text-3xl md:text-4xl font-bold">${last7Days.length}</p>
+                    <p class="text-sm opacity-90">Days Tracked</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl md:text-4xl font-bold">${streak}</p>
+                    <p class="text-sm opacity-90">Day Streak</p>
+                </div>
+            </div>
+            <p class="mt-6 text-base md:text-lg opacity-90 px-2">
+                ${getMotivationalMessage(avgScore)}
+            </p>
+        </div>
+    `;
+}
+
+function getMotivationalMessage(score) {
+    if (score >= 4.5) return "Outstanding! You're radiating positive energy! 🌟";
+    if (score >= 4) return "Excellent work! Your mental wellness is thriving! 🎉";
+    if (score >= 3.5) return "Great job! Keep nurturing your well-being! 💪";
+    if (score >= 3) return "Good effort! Small steps lead to big changes! 🌱";
+    return "Remember: It's okay to have tough days. You're doing your best! 💙";
+}
+
+function createSocialShareCard() {
+    const streak = calculateStreak(JSON.parse(localStorage.getItem('moodHistory') || '{}'));
+    const totalEntries = Object.keys(JSON.parse(localStorage.getItem('moodHistory') || '{}')).length;
+    
+    document.getElementById('socialShareCard').innerHTML = `
+        <div class="text-center px-4">
+            <h3 class="text-xl md:text-2xl font-bold mb-4">Share Your Achievement</h3>
+            <div class="bg-white/20 rounded-lg p-4 md:p-6 mb-4">
+                <p class="text-4xl md:text-5xl font-bold mb-2">${streak} Days</p>
+                <p class="text-lg md:text-xl">Tracking Streak</p>
+                <p class="text-sm mt-2 opacity-90">${totalEntries} total moods tracked</p>
+            </div>
+            <button onclick="shareAchievement()" class="bg-white text-pink-600 font-bold py-3 px-6 md:px-8 rounded-lg hover:bg-gray-100 transition-colors text-sm md:text-base">
+                Share on Social Media 📱
+            </button>
+            <p class="text-xs mt-3 opacity-75">Your personal data stays private</p>
+        </div>
+    `;
+}
+
+function shareAchievement() {
+    const streak = calculateStreak(JSON.parse(localStorage.getItem('moodHistory') || '{}'));
+    const shareText = `I've been tracking my mental wellness for ${streak} days straight with MindTracker! 🧠✨ Taking care of my mental health one day at a time. #MentalHealth #SelfCare #Wellness`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'MindTracker Achievement',
+            text: shareText
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareText);
+        showNotification('Achievement text copied to clipboard!', 'success');
+    }
+}
+
+function exportToCSV() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const moodDetails = JSON.parse(localStorage.getItem('moodDetails') || '{}');
+    
+    let csv = 'Date,Mood,Time of Day,Activities,Timestamp\n';
+    
+    Object.entries(moodHistory).sort().forEach(([date, mood]) => {
+        const details = moodDetails[date] || {};
+        const tags = details.tags ? details.tags.join('; ') : '';
+        const timeOfDay = details.timeOfDay || '';
+        const timestamp = details.timestamp || '';
+        csv += `${date},${mood},${timeOfDay},${tags},${timestamp}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mindtracker-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('Mood data exported successfully!', 'success');
+}
+
+function generateWeeklyReport() {
+    const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+    const dates = Object.keys(moodHistory).sort();
+    const last7Days = dates.slice(-7);
+    
+    const avgScore = last7Days.length > 0 
+        ? (last7Days.reduce((sum, date) => sum + getMoodScore(moodHistory[date]), 0) / last7Days.length).toFixed(2)
+        : 0;
+    
+    const reportText = `
+MINDTRACKER WEEKLY REPORT
+========================
+Generated: ${new Date().toLocaleDateString()}
+
+SUMMARY
+-------
+Days Tracked: ${last7Days.length}/7
+Average Mood Score: ${avgScore}/5.0
+Current Streak: ${calculateStreak(moodHistory)} days
+
+DAILY BREAKDOWN
+--------------
+${last7Days.map(date => `${date}: ${moodHistory[date].toUpperCase()}`).join('\n')}
+
+INSIGHTS
+--------
+${avgScore >= 4 ? '✓ Your mood has been excellent this week!' : avgScore >= 3 ? '• Your mood has been stable this week.' : '⚠ Consider self-care activities to improve your mood.'}
+
+Keep tracking your mental wellness!
+    `;
+    
+    const blob = new Blob([reportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mindtracker-weekly-report-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('Weekly report generated!', 'success');
+}
+
+function createBreathePage() {
+    const container = document.getElementById('breathe-page');
+    if (container.innerHTML.trim().length > 50) return;
+    
+    container.innerHTML = `
+<div class="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-blue-50/30 to-slate-50 dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
+<header class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 px-4 md:px-10 py-4">
+<div class="flex items-center justify-between max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<h1 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100">Breathe & Meditate</h1>
+</div>
+<button onclick="navigateTo('dashboard')" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center gap-2">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+</svg>
+Back
+</button>
+</div>
+</header>
+
+<main class="flex-1 flex items-center justify-center px-4 py-12">
+<div class="max-w-5xl w-full">
+<div class="text-center mb-12">
+<h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-3 tracking-tight">Find Your Calm</h2>
+<p class="text-base md:text-lg text-gray-500 dark:text-gray-400 font-light max-w-2xl mx-auto">Practice mindful breathing to reduce stress and restore balance</p>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8 mb-12">
+<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8 md:p-10">
+<div class="mb-6">
+<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Breathing Exercise</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Follow the gentle rhythm: 4 seconds each phase</p>
+</div>
+
+<div class="flex flex-col items-center mb-8">
+<div class="relative mb-6">
+<div id="breathingCircle" class="w-56 h-56 rounded-full bg-gradient-to-br from-cyan-400/20 via-blue-400/20 to-indigo-400/20 dark:from-cyan-500/30 dark:via-blue-500/30 dark:to-indigo-500/30 flex items-center justify-center transition-all duration-[4000ms] ease-in-out shadow-lg relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-cyan-400/30 to-blue-500/30 dark:from-cyan-400/40 dark:to-blue-500/40 blur-2xl"></div>
+<div class="relative z-10 text-center">
+<p id="breatheText" class="text-2xl font-light text-gray-700 dark:text-gray-200 mb-1">Ready</p>
+<p id="breatheCount" class="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide"></p>
+</div>
+</div>
+</div>
+</div>
+
+<button id="breatheButton" onclick="startBreathing()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 text-base shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 hover:-translate-y-0.5">
+Start Breathing
+</button>
+</div>
+
+<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8 md:p-10">
+<div class="mb-6">
+<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Meditation Timer</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Set your practice duration</p>
+</div>
+
+<div class="flex gap-3 mb-8">
+<button onclick="setMeditationTimer(1)" class="flex-1 group relative overflow-hidden bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-600/50 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:border-cyan-500 dark:hover:border-cyan-400">
+<span class="relative z-10">1 min</span>
+</button>
+<button onclick="setMeditationTimer(5)" class="flex-1 group relative overflow-hidden bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-600/50 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:border-cyan-500 dark:hover:border-cyan-400">
+<span class="relative z-10">5 min</span>
+</button>
+<button onclick="setMeditationTimer(10)" class="flex-1 group relative overflow-hidden bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-600/50 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:border-cyan-500 dark:hover:border-cyan-400">
+<span class="relative z-10">10 min</span>
+</button>
+</div>
+
+<div id="timerDisplay" class="text-center hidden">
+<div class="mb-6">
+<p class="text-6xl font-light text-gray-900 dark:text-white mb-2 tabular-nums" id="timerText">5:00</p>
+<p class="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Time Remaining</p>
+</div>
+<button id="timerButton" onclick="startTimer()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5">
+Start Timer
+</button>
+</div>
+</div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/30 dark:border-gray-700/30 text-center hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200">
+<div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+<svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+</div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-1">Reduce Stress</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Calm your nervous system</p>
+</div>
+<div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/30 dark:border-gray-700/30 text-center hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200">
+<div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+</svg>
+</div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-1">Better Focus</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Improve concentration</p>
+</div>
+<div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/30 dark:border-gray-700/30 text-center hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200">
+<div class="w-12 h-12 bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+<svg class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+</svg>
+</div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-1">Inner Peace</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Find tranquility</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+    `;
+}
+
+let breathingInterval = null;
+let isBreathing = false;
+let breathingCountInterval = null;
+
+function startBreathing() {
+    const circle = document.getElementById('breathingCircle');
+    const text = document.getElementById('breatheText');
+    const countText = document.getElementById('breatheCount');
+    const button = document.getElementById('breatheButton');
+    
+    if (isBreathing) {
+        clearInterval(breathingInterval);
+        clearInterval(breathingCountInterval);
+        isBreathing = false;
+        button.textContent = 'Start Breathing';
+        circle.style.transform = 'scale(1)';
+        text.textContent = 'Ready';
+        countText.textContent = '';
+        return;
+    }
+    
+    isBreathing = true;
+    button.textContent = 'Stop';
+    let phase = 0;
+    
+    const breathingCycle = () => {
+        let count = 4;
+        countText.textContent = count;
+        
+        if (breathingCountInterval) clearInterval(breathingCountInterval);
+        breathingCountInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countText.textContent = count;
+            }
+        }, 1000);
+        
+        switch(phase % 4) {
+            case 0:
+                text.textContent = 'Inhale';
+                circle.style.transform = 'scale(1.4)';
+                break;
+            case 1:
+                text.textContent = 'Hold';
+                circle.style.transform = 'scale(1.4)';
+                break;
+            case 2:
+                text.textContent = 'Exhale';
+                circle.style.transform = 'scale(1)';
+                break;
+            case 3:
+                text.textContent = 'Hold';
+                circle.style.transform = 'scale(1)';
+                break;
+        }
+        phase++;
+    };
+    
+    breathingCycle();
+    breathingInterval = setInterval(breathingCycle, 4000);
+}
+
+let meditationDuration = 0;
+let meditationInterval = null;
+let meditationRunning = false;
+
+function setMeditationTimer(minutes) {
+    meditationDuration = minutes * 60;
+    document.getElementById('timerDisplay').classList.remove('hidden');
+    document.getElementById('timerText').textContent = `${minutes}:00`;
+    document.getElementById('timerButton').textContent = 'Start Timer';
+    meditationRunning = false;
+    if (meditationInterval) clearInterval(meditationInterval);
+}
+
+function startTimer() {
+    const button = document.getElementById('timerButton');
+    const timerText = document.getElementById('timerText');
+    
+    if (meditationRunning) {
+        clearInterval(meditationInterval);
+        meditationRunning = false;
+        button.textContent = 'Resume';
+        return;
+    }
+    
+    meditationRunning = true;
+    button.textContent = 'Pause';
+    
+    meditationInterval = setInterval(() => {
+        meditationDuration--;
+        
+        if (meditationDuration <= 0) {
+            clearInterval(meditationInterval);
+            meditationRunning = false;
+            button.textContent = 'Start Timer';
+            timerText.textContent = '0:00';
+            showNotification('Meditation complete! Well done! 🧘', 'success');
+            return;
+        }
+        
+        const minutes = Math.floor(meditationDuration / 60);
+        const seconds = meditationDuration % 60;
+        timerText.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
